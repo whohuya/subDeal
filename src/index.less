@@ -1,0 +1,77 @@
+html,
+body,
+:global(#root) {
+  height: 100%;
+}
+
+canvas {
+  display: block;
+}
+
+body {
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.globalSpin {
+  width: 100%;
+  margin: 40px 0 !important;
+}
+
+:global {
+  // temp fix for https://github.com/ant-design/ant-design/commit/a1fafb5b727b62cb0be29ce6e9eca8f579d4f8b7
+  .ant-spin-container {
+    overflow: visible !important;
+  }
+
+  /* table styles */
+  .table-input-search {
+    padding: 8px;
+    border-radius: 6px;
+    background: #fff;
+    box-shadow: 0 1px 6px rgba(0, 0, 0, .2);
+  }
+
+  .table-input-search input {
+    width: 144px;
+    margin-right: 8px;
+  }
+  .table-fixed table {
+    table-layout: fixed;
+  }
+  .table-td-div-overflow {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  /* modal form styles */
+  .modal-form {
+    max-width: 400px;
+    margin: 10px;
+  }
+
+  .modal-form-button {
+    width: 100%;
+  }
+
+  /* detail modal styles */
+  .vertical-center-modal {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    .ant-modal {
+      top: 0;
+    }
+  }
+
+  .full-width-vertical-center-modal {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    .ant-modal {
+      top: 0;
+      width: 95% !important;
+    }
+  }
+}
