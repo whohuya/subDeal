@@ -56,11 +56,13 @@ export default {
         callback(res)
       }
     },
+
     * queryById ({payload, callback}, {call, put}) {
       const response = yield  call(query, payload)
       const res = {
         ...response.attributes,
         img: response.attributes.img.attributes,
+        sellName:response.attributes.sellName.attributes
       }
       if (callback) {
         callback(res)

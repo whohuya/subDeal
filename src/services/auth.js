@@ -22,14 +22,14 @@ export async function register ({username, password}) {
   }
 }
 
-export async function signUpAdmin ({username, password, mail, name}) {
+export async function signUpAdmin ({username, password, mail, name,phone}) {
   const user = new Parse.User()
   try {
     user.setUsername(username)
     user.setPassword(password)
     user.setEmail(mail)
     user.set('name', name)
-
+    user.set('phone', phone)
     // const actNew=new Parse.Role('Admin')
     // const relation=actNew.getUsers()
     // relation.add(user.current())

@@ -178,7 +178,6 @@ export default class Register extends Component {
               ],
             })(<Input size="large" placeholder="昵称"/>)}
           </FormItem>
-
           <FormItem>
             {getFieldDecorator('mail', {
               rules: [
@@ -192,6 +191,20 @@ export default class Register extends Component {
                 },
               ],
             })(<Input size="large" placeholder="邮箱"/>)}
+          </FormItem>
+          <FormItem>
+            {getFieldDecorator('phone', {
+              rules: [
+                {
+                  required: true,
+                  message: '请输入手机号！',
+                },
+                {
+                  min:11,
+                  message: '手机号长度不正确！',
+                },
+              ],
+            })(<Input size="large" placeholder="手机号"/>)}
           </FormItem>
           <FormItem help={this.state.help}>
             <Popover
