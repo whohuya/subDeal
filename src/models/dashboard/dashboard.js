@@ -1,30 +1,30 @@
-import { queryCarousel, queryAllGoods, find } from "../../services/deal/deal";
-import { reloadAuthorized } from "../../utils/Authorized";
-import { routerRedux } from "dva/router";
-import commonHelper from "../Helpers/Help";
+import { queryCarousel, queryAllGoods, find, query } from '../../services/deal/deal'
+import { reloadAuthorized } from '../../utils/Authorized'
+import { routerRedux } from 'dva/router'
+import commonHelper from '../Helpers/Help'
 
 export default {
-  namespace: "dashboard/dashboard",
+  namespace: 'dashboard/dashboard',
 
   state: {
     roles: [],
-    mobilePhoneNumber: "",
+    mobilePhoneNumber: '',
     status: undefined,
     loading: false
   },
 
   effects: {
-    *findCarousel({ callback }, { call, put }) {
-      const response = yield call(queryCarousel);
+    * findCarousel ({callback}, {call, put}) {
+      const response = yield call(queryCarousel)
       const res = response
         .map(item => item.attributes)
-        .map(item => item.url.attributes);
+        .map(item => item.url.attributes)
       if (callback) {
-        callback(res);
+        callback(res)
       }
     },
-    *findAllGoods({ callback }, { call, put }) {
-      const response = yield call(queryAllGoods);
+    * findAllGoods ({callback}, {call, put}) {
+      const response = yield call(queryAllGoods)
       const res = commonHelper
         .parseObjectArrayToObjectArray(response)
         .map(item => {
@@ -32,16 +32,16 @@ export default {
             ...item,
             img: item.img.attributes,
             sellName: item.sellName.attributes
-          };
-        });
+          }
+        })
 
-      console.log(res);
+      console.log(res)
       if (callback) {
-        callback(res);
+        callback(res)
       }
     },
-    *findGoodsByType({ payload, callback }, { call, put }) {
-      const response = yield call(find, payload);
+    * findGoodsByType ({payload, callback}, {call, put}) {
+      const response = yield call(find, payload)
       const res = commonHelper
         .parseObjectArrayToObjectArray(response)
         .map(item => {
@@ -49,14 +49,24 @@ export default {
             ...item,
             img: item.img.attributes,
             sellName: item.sellName.attributes
-          };
-        });
-      console.log(res);
+          }
+        })
+      console.log(res)
       if (callback) {
-        callback(res);
+        callback(res)
       }
-    }
+    },
+    * queryById ({payload, callback}, {call, put}) {
+      const response = yield  call(query, payload)
+      const res = {
+        ...response.attributes,
+        img: response.attributes.img.attributes,
+      }
+      if (callback) {
+        callback(res)
+      }
+    },
   },
 
   reducers: {}
-};
+}

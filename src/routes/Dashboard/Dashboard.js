@@ -93,7 +93,7 @@ export default class Dashboard extends Component {
           style={{
             marginBottom: 8
           }}
-        ><Link to={{pathname:'/GoodsDetails',query:{item}}}>
+        ><Link to={{pathname:'/GoodsDetails',query:{id:item.id}}}>
           <div
             style={{
               width: 200,
