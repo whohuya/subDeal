@@ -68,19 +68,3 @@ export async function find (payload) {
   }
 }
 
-export async function queryStar (payload) {
-  const {id, user} = payload
-  try {
-    const query = new Parse.Query('star')
-    query.equalTo('Goods',id)
-    query.equalTo('name',user)
-    const response = await query.find()
-    return response
-  } catch (e) {
-    handleError(e)
-    return Promise.resolve({
-      status: 'fail'
-    })
-  }
-}
-

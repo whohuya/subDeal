@@ -12,6 +12,11 @@ import {
   DatePicker,
   Carousel,
   Divider,
+  Comment,
+  Form,
+  Input,
+  List,
+  message,
   Switch,
   BackTop,
   Popconfirm,
@@ -22,10 +27,20 @@ import {
   Dropdown
 } from 'antd'
 import { Link } from 'dva/router'
-
+import moment from 'moment';
 import { getTimeDistance } from '../../utils/utils'
 import PageHeaderLayout from '../../layouts/PageHeaderLayout'
 import { Parse } from '../../utils/leancloud'
+
+const TextArea = Input.TextArea;
+const CommentList = ({ comments }) => (
+  <List
+    dataSource={comments}
+    header={`${comments.length} ${comments.length > 1 ? 'replies' : 'reply'}`}
+    itemLayout="horizontal"
+    renderItem={props => <Comment {...props} />}
+  />
+);
 
 @connect()
 export default class Details extends Component {
@@ -34,7 +49,11 @@ export default class Details extends Component {
     visible: false,
 
   }
-
+   async componentWillMount(){
+    const {query} = this.props.location
+    const user = await Parse.User.current()
+    await this.isStar(query.id, user.id)
+  }
   async componentDidMount () {
     const {query} = this.props.location
     await this.onLoadDetail(query)
@@ -44,7 +63,7 @@ export default class Details extends Component {
   }
 
   isStar = (goods, user) => {
-    console.log('is star')
+
     this.props.dispatch({
       type: 'dashboard/star/isStar',
       payload: {
@@ -55,6 +74,34 @@ export default class Details extends Component {
         this.setState({
           currentUserIsStar: res
         })
+      }
+    })
+  }
+  addStar= async ()=>{
+    const {query} = this.props.location
+    const user = await Parse.User.current()
+    this.props.dispatch({
+      type: 'dashboard/star/add',
+      payload: {
+        id: query.id,
+        user: user.id,
+      },
+      callback: res => {
+        res==='ok'? message.success('收藏成功！'):message.error('收藏失败')
+      }
+    })
+  }
+  cancelStar= async ()=>{
+    const {query} = this.props.location
+    const user = await Parse.User.current()
+    this.props.dispatch({
+      type: 'dashboard/star/cancel',
+      payload: {
+        id: query.id,
+        user: user.id,
+      },
+      callback: res => {
+        res==='ok'? message.success('已取消收藏！'):message.error('取消失败')
       }
     })
   }
@@ -71,7 +118,14 @@ export default class Details extends Component {
       }
     })
   }
+  onStarGoods=(checked)=>{
+    if(checked===true){
+        this.addStar()
+    }else {
+        this.cancelStar()
+    }
 
+    }
   confirm = () => {
     this.setState({
       visible: true,
@@ -86,7 +140,8 @@ export default class Details extends Component {
   render () {
     const {item, currentUserIsStar, visible} = this.state
     const TabPane = Tabs.TabPane;
-    console.log(item)
+
+
     return (
       <PageHeaderLayout title="商品详情">
         {item&& <div>
@@ -124,8 +179,11 @@ export default class Details extends Component {
                   <h3 style={{marginBottom: 16}}>所 在 地 ：{item.place}</h3>
                   <h3 style={{marginBottom: 16}}>联系方式：<span style={{color: '#999999'}}>确认购买可见</span></h3>
                   <h3 style={{marginBottom: 16}}>交易方式：<span style={{color: '#999999'}}>暂只支持线下交易</span></h3>
-                  <h3 style={{marginBottom: 16}}>收&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;藏：<Switch checkedChildren="已收藏" unCheckedChildren="未收藏"
-                                                                                          defaultChecked={currentUserIsStar}/></h3>
+                  <h3 style={{marginBottom: 16}}>收&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;藏：
+                    <Switch onChange={this.onStarGoods}
+                            checkedChildren="已收藏"
+                            unCheckedChildren="未收藏"
+                            defaultChecked={currentUserIsStar}/></h3>
                   <Popconfirm title="确认需要购买吗?" onConfirm={this.confirm} onCancel={this.cancel} okText="Yes"
                               cancelText="No">
                     <Button style={{width: '50%', marginBottom: 16}} type="primary" size={'large'}>确认购买</Button>
@@ -139,7 +197,9 @@ export default class Details extends Component {
             <TabPane tab="宝贝描述" key="1">
               <h3>{item.describe===undefined?'该卖家没有添加对该宝贝的描述':item.describe}</h3>
             </TabPane>
-            <TabPane tab="留言" key="2">Content of Tab Pane 2</TabPane>
+            <TabPane tab="留言" key="2">
+
+            </TabPane>
           </Tabs>
         </Card>
         </div>}

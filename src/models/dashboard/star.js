@@ -1,4 +1,5 @@
-import { query,queryStar } from '../../services/deal/deal'
+import {queryStar ,add,cancel} from '../../services/deal/star'
+import { query } from '../../services/deal/deal'
 import { reloadAuthorized } from '../../utils/Authorized'
 import { routerRedux } from 'dva/router'
 import commonHelper from '../Helpers/Help'
@@ -34,6 +35,18 @@ export default {
         callback(res)
       }
     },
+    *add({payload,callback},{call}){
+      const response=yield call(add,payload)
+     if (callback){
+        callback(response.status)
+     }
+    },
+    *cancel({payload,callback},{call}){
+      const response=yield call(cancel,payload)
+      if (callback){
+        callback(response.status)
+      }
+    }
   },
 
   reducers: {
