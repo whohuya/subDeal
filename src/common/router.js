@@ -95,7 +95,7 @@ export const getRouterData = app => {
       )
     },
     "/GoodsDetails": {
-      component: dynamicWrapper(app, ["dashboard/star"], () =>
+      component: dynamicWrapper(app, ["dashboard/star",'dashboard/comment'], () =>
         import("../routes/Goods/Details")
       )
     },

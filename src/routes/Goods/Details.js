@@ -27,39 +27,125 @@ import {
   Dropdown
 } from 'antd'
 import { Link } from 'dva/router'
-import moment from 'moment';
+import moment from 'moment'
 import { getTimeDistance } from '../../utils/utils'
 import PageHeaderLayout from '../../layouts/PageHeaderLayout'
 import { Parse } from '../../utils/leancloud'
 
-const TextArea = Input.TextArea;
-const CommentList = ({ comments }) => (
+const TextArea = Input.TextArea
+const CommentList = ({comments}) => (
   <List
     dataSource={comments}
     header={`${comments.length} ${comments.length > 1 ? 'replies' : 'reply'}`}
     itemLayout="horizontal"
     renderItem={props => <Comment {...props} />}
   />
-);
+)
+const Editor = ({
+  onChange, onSubmit, submitting, value,
+}) => (
+  <div>
+    <Form.Item>
+      <TextArea rows={4} onChange={onChange} value={value}/>
+    </Form.Item>
+    <Form.Item>
+      <Button
+        htmlType="submit"
+        loading={submitting}
+        onClick={onSubmit}
 
-@connect()
+        type="primary"
+      >
+        Add Comment
+      </Button>
+    </Form.Item>
+  </div>
+)
+@connect(state => ({
+  comments: state['dashboard/comment'].comments,
+}))
 export default class Details extends Component {
   state = {
     item: '',
+    show: true,
+    user: '',
+    comments: [],
+    submitting: false,
+    value: '',
     visible: false,
 
   }
-   async componentWillMount(){
+
+  async componentWillMount () {
     const {query} = this.props.location
     const user = await Parse.User.current()
+    this.setState({
+      user: user.attributes
+    })
     await this.isStar(query.id, user.id)
   }
+
   async componentDidMount () {
     const {query} = this.props.location
-    await this.onLoadDetail(query)
     const user = await Parse.User.current()
+    await this.onLoadDetail(query)
     await this.isStar(query.id, user.id)
+    await this.onLoadComments()
 
+  }
+
+  onLoadComments = () => {
+    const {query} = this.props.location
+    console.log('comments')
+    this.props.dispatch({
+      type: 'dashboard/comment/findAll',
+      payload: {
+        id: query.id,
+      },
+      callback: res => {
+        this.setState({
+          comments: res
+        })
+      }
+    })
+  }
+  onAddComments = async () => {
+    const {query} = this.props.location
+    const {user, value} = this.state
+    const id = Parse.User.current()
+    this.props.dispatch({
+      type: 'dashboard/comment/add',
+      payload: {
+        id: query.id,
+        author: user.name,
+        content: value,
+        name: id.id,
+      },
+      callback: (res) => {
+        res === 'ok' ? this.setState({
+          submitting: false,
+          value: '',
+        }) : message.error('评论失败')
+      }
+    })
+    await this.onLoadComments()
+  }
+  handleSubmit = () => {
+    if (!this.state.value) {
+      return
+    }
+
+    this.setState({
+      submitting: true,
+    })
+
+    this.onAddComments()
+
+  }
+  handleChange = (e) => {
+    this.setState({
+      value: e.target.value,
+    })
   }
 
   isStar = (goods, user) => {
@@ -77,7 +163,7 @@ export default class Details extends Component {
       }
     })
   }
-  addStar= async ()=>{
+  addStar = async () => {
     const {query} = this.props.location
     const user = await Parse.User.current()
     this.props.dispatch({
@@ -87,11 +173,11 @@ export default class Details extends Component {
         user: user.id,
       },
       callback: res => {
-        res==='ok'? message.success('收藏成功！'):message.error('收藏失败')
+        res === 'ok' ? message.success('收藏成功！') : message.error('收藏失败')
       }
     })
   }
-  cancelStar= async ()=>{
+  cancelStar = async () => {
     const {query} = this.props.location
     const user = await Parse.User.current()
     this.props.dispatch({
@@ -101,7 +187,7 @@ export default class Details extends Component {
         user: user.id,
       },
       callback: res => {
-        res==='ok'? message.success('已取消收藏！'):message.error('取消失败')
+        res === 'ok' ? message.success('已取消收藏！') : message.error('取消失败')
       }
     })
   }
@@ -118,14 +204,14 @@ export default class Details extends Component {
       }
     })
   }
-  onStarGoods=(checked)=>{
-    if(checked===true){
-        this.addStar()
-    }else {
-        this.cancelStar()
+  onStarGoods = (checked) => {
+    if (checked === true) {
+      this.addStar()
+    } else {
+      this.cancelStar()
     }
 
-    }
+  }
   confirm = () => {
     this.setState({
       visible: true,
@@ -138,13 +224,13 @@ export default class Details extends Component {
   }
 
   render () {
-    const {item, currentUserIsStar, visible} = this.state
-    const TabPane = Tabs.TabPane;
-
-
+    const {comments} = this.props
+    const {item, show, user, currentUserIsStar, visible, submitting, value} = this.state
+    const TabPane = Tabs.TabPane
+    console.log(item)
     return (
       <PageHeaderLayout title="商品详情">
-        {item&& <div>
+        {item && <div>
           <BackTop/>
           <Modal
             title="卖家联系方式"
@@ -153,15 +239,15 @@ export default class Details extends Component {
             onCancel={this.cancel}
           >
             <p>电话：{item.sellName.phone}</p>
-            <p>微信：{item.sellName.weChat===undefined?'该卖家没有留微信，电话联系吧':item.sellName.weChat}</p>
+            <p>微信：{item.sellName.weChat === undefined ? '该卖家没有留微信，电话联系吧' : item.sellName.weChat}</p>
             <p>赶紧联系卖家进行线下交易吧！</p>
           </Modal>
           <Card>
             <Row>
               <Col span={12}>
-                <div>
+                <div style={{maxHeight: 800, overflow: 'hidden'}}>
                   <img
-                    style={{width: '100%', height: '100%'}}
+                    style={{width: '100%', height: '100%',}}
                     src={item.img.url}
                   />
                 </div>
@@ -192,16 +278,40 @@ export default class Details extends Component {
               </Col>
             </Row>
           </Card>
-        <Card style={{marginTop:16}}>
-          <Tabs defaultActiveKey="1" >
-            <TabPane tab="宝贝描述" key="1">
-              <h3>{item.describe===undefined?'该卖家没有添加对该宝贝的描述':item.describe}</h3>
-            </TabPane>
-            <TabPane tab="留言" key="2">
-
-            </TabPane>
-          </Tabs>
-        </Card>
+          <Card style={{marginTop: 16}}>
+            <Tabs defaultActiveKey="1">
+              <TabPane tab="宝贝描述" key="1">
+                <h3>{item.describe === undefined ? '该卖家没有添加对该宝贝的描述' : item.describe}</h3>
+              </TabPane>
+              <TabPane tab="留言" key="2">
+                <div>
+                  {comments.length > 0 && <CommentList comments={comments}/>}
+                  <Comment
+                    avatar={(
+                      <Avatar
+                        style={{
+                          backgroundColor: '#1585FF',
+                          verticalAlign: 'middle',
+                          marginTop: 8
+                        }}
+                        size={'large'}
+                      >
+                        {user.name}
+                      </Avatar>
+                    )}
+                    content={(
+                      <Editor
+                        onChange={this.handleChange}
+                        onSubmit={this.handleSubmit}
+                        submitting={submitting}
+                        value={value}
+                      />
+                    )}
+                  />
+                </div>
+              </TabPane>
+            </Tabs>
+          </Card>
         </div>}
 
       </PageHeaderLayout>
