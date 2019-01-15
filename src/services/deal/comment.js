@@ -5,70 +5,72 @@
  * logout todo: register mobile phone
  */
 
-import { Parse, Promise, handleError } from '../../utils/leancloud'
-import { setAuthority } from '../../utils/authority'
+import { Parse, Promise, handleError } from "../../utils/leancloud";
+import { setAuthority } from "../../utils/authority";
 
-export async function query (payload) {
-  const {id} = payload
+export async function query(payload) {
+  const { id } = payload;
   try {
-    const query = new Parse.Query('Comments')
-    query.equalTo('GoodsId', id)
-    query.descending('createdAt')
-    const response = await query.find()
-    return response
+    const query = new Parse.Query("Comments");
+    const targetGoods = Parse.Object.createWithoutData("Goods", id);
+    query.equalTo("Goods", targetGoods);
+    query.descending("createdAt");
+    const response = await query.find();
+    return response;
   } catch (e) {
-    handleError(e)
+    handleError(e);
     return Promise.resolve({
-      status: 'fail'
-    })
+      status: "fail"
+    });
   }
 }
 
-export async function add (payload) {
-  const {author,content,id,name} = payload
-  console.log(payload)
+export async function add(payload) {
+  const { author, content, id, name } = payload;
   try {
-    const Comment = Parse.Object.extend('Comments')
-    const comments=new Comment()
-   comments.set('GoodsId',id)
-    comments.set('author',author)
-    comments.set('content',content)
-    const targetStarName = Parse.Object.createWithoutData('_User', name)
-    comments.set('name',targetStarName)
-    const response = await comments.save()
-    return Promise.resolve({
-      status: 'ok',
-      response
-    })
+    const Comment = Parse.Object.extend("Comments");
+    const comments = new Comment();
+    comments.set("GoodsId", id);
+    comments.set("author", author);
+    comments.set("content", content);
+    const targetStarName = Parse.Object.createWithoutData("_User", name);
+    const targetGoods = Parse.Object.createWithoutData("Goods", id);
+    comments.set("Goods", targetGoods);
+    comments.set("name", targetStarName);
+    const response = await comments.save();
 
-  } catch (e) {
-    handleError(e)
-    console.log(e)
     return Promise.resolve({
-      status: 'fail'
-    })
+      status: "ok",
+      response
+    });
+  } catch (e) {
+    handleError(e);
+    console.log(e);
+    return Promise.resolve({
+      status: "fail"
+    });
   }
 }
 
-export async function cancel (payload) {
-  const {id,user} = payload
+export async function cancel(payload) {
+  const { id, user } = payload;
   try {
-    const query = new Parse.Query('star')
-    query.equalTo('Goods', id)
-    query.equalTo('name', user)
-    const res = await query.find()
+    const query = new Parse.Query("star");
+    query.equalTo("Goods", id);
+    query.equalTo("name", user);
+    const res = await query.find();
 
-    const del=Parse.Object.createWithoutData('star',res[0].id)
-    const response=await  del.destroy()
+    const del = Parse.Object.createWithoutData("star", res[0].id);
+    const response = await del.destroy();
     return Promise.resolve({
-      status: 'ok',
+      status: "ok",
       response
-    })
+    });
   } catch (e) {
-    handleError(e)
-    console.log(e)
+    handleError(e);
+    console.log(e);
     return Promise.resolve({
-      status: 'fail'
-    })
+      status: "fail"
+    });
   }
 }

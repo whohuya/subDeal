@@ -7,12 +7,12 @@ const menuData = [
     path: "dashboard",
     authority: ["Guest", "Admin", "Root"]
   },
-  // {
-  //   name: "我的收藏",
-  //   icon: "dashboard",
-  //   authority: ["Root", "Admin"],
-  //   path: "GoodsDetails"
-  // },
+  {
+    name: "我的收藏",
+    icon: "dashboard",
+    authority: ["Root", "Admin"],
+    path: "GoodsStar"
+  },
   {
     name: "基础数据",
     icon: "dashboard",

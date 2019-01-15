@@ -15,7 +15,6 @@ export default {
 	effects: {
 		*login({ payload }, { call, put }) {
 			console.warn("in fetch effects");
-			yield put(routerRedux.push("/"));
 			yield put({ type: "updateLoading", payload: true });
 			const response = yield call(login, payload);
 			console.warn("response: ", response);

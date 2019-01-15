@@ -1,4 +1,4 @@
-import {queryStar ,add,cancel} from '../../services/deal/star'
+import { queryStar, add, cancel, fetchUserStar } from '../../services/deal/star'
 import { query } from '../../services/deal/deal'
 import { reloadAuthorized } from '../../utils/Authorized'
 import { routerRedux } from 'dva/router'
@@ -15,15 +15,14 @@ export default {
   },
 
   effects: {
-    *findStar({payload,callback},{call,put}){
-      const res= yield  call(queryStar,payload)
-      yield put({type: 'save', payload: response})
+
+    * isStar ({payload, callback}, {call, put}) {
+      const res = yield  call(queryStar, payload)
+      const starBool = res.length === 0 ? false : res.length === 1 ? true : null
+      if (callback) {
+        callback(starBool)
+      }
     },
-    *isStar({payload,callback},{call,put}){
-      const res= yield  call(queryStar,payload)
-      const starBool=res.length===0?false:res.length===1?true:null
-      if(callback)callback(starBool)
-     },
 
     * queryById ({payload, callback}, {call, put}) {
       const response = yield  call(query, payload)
@@ -35,15 +34,29 @@ export default {
         callback(res)
       }
     },
-    *add({payload,callback},{call}){
-      const response=yield call(add,payload)
-     if (callback){
+    * fetchByUserId ({payload, callback}, {call}) {
+      const response = yield call(fetchUserStar, payload)
+      const res = commonHelper.parseObjectArrayToObjectArray(response)
+                              .map(item => {
+                                return {
+                                  ...item,
+                                  starGoods: item.starGoods.attributes,
+                                  starName: item.starName.attributes,
+                                }
+                              })
+      if(callback){
+        callback(res)
+
+      }},
+    * add ({payload, callback}, {call}) {
+      const response = yield call(add, payload)
+      if (callback) {
         callback(response.status)
-     }
+      }
     },
-    *cancel({payload,callback},{call}){
-      const response=yield call(cancel,payload)
-      if (callback){
+    * cancel ({payload, callback}, {call}) {
+      const response = yield call(cancel, payload)
+      if (callback) {
         callback(response.status)
       }
     }

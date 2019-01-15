@@ -24,7 +24,24 @@ export async function queryStar (payload) {
     })
   }
 }
-
+export async function fetchUserStar (payload) {
+  const {id}=payload
+  try {
+    const query=new Parse.Query('star')
+    const targetStarName = Parse.Object.createWithoutData('_User', id)
+    query.equalTo('starName',targetStarName)
+    query.include('starName')
+    query.include('starGoods')
+    query.descending('createdAt')
+    const response = await query.find()
+      return response
+  }catch(e){
+    handleError(e)
+    return Promise.resolve({
+      status: 'fail'
+    })
+  }
+}
 export async function add (payload) {
   const {id, user} = payload
   try {
