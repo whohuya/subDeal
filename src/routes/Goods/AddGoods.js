@@ -33,7 +33,7 @@ import { Parse } from '../../utils/leancloud'
 
 const Column = Table.Column
 @connect()
-export default class Star extends Component {
+export default class Details extends Component {
   state = {
     star: [],
     GoodsDetail: {},

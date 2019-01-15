@@ -92,9 +92,9 @@ class BasicLayout extends React.PureComponent {
   getPageTitle() {
     const { routerData, location } = this.props;
     const { pathname } = location;
-    let title = "洛阳师范二手交易市场";
+    let title = "河南城建二手交易市场";
     if (routerData[pathname] && routerData[pathname].name) {
-      title = `${routerData[pathname].name} - 洛阳师范二手交易市场`;
+      title = `${routerData[pathname].name} - 河南城建二手交易市场`;
     }
     return title;
   }
@@ -211,20 +211,20 @@ class BasicLayout extends React.PureComponent {
                 {
                   key: 0,
                   title: "商品管理",
-                  href: "http://www.limpidt.com",
+                  href: "http://www.hncj.edu.cn/",
                   blankTarget: true
                 },
                 {
                   key: 1,
-                  title: "洛阳师范学院",
-                  href: "http://www.limpidt.com",
+                  title: "河南城建学院",
+                  href: "http://www.hncj.edu.cn/",
                   blankTarget: true
                 }
               ]}
               copyright={
                 <Fragment>
                   Copyright <Icon type="copyright" /> 2018
-                  洛阳师范二手交易市场
+                  河南城建二手交易市场
                 </Fragment>
               }
             />

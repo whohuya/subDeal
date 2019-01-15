@@ -9,29 +9,24 @@ const menuData = [
   },
   {
     name: "我的收藏",
-    icon: "dashboard",
+    icon: "shopping-cart",
     authority: ["Root", "Admin"],
     path: "GoodsStar"
   },
   {
-    name: "基础数据",
-    icon: "dashboard",
+    name: "我的商品",
+    icon: "inbox",
     authority: ["Root", "Admin"],
-    path: "basic"
+    path: "GoodsList"
+  },
+  {
+    name: "出售商品",
+    icon: "sound",
+    authority: ["Root", "Admin"],
+    path: "AddGoods"
   },
 
-  {
-    name: "商品",
-    icon: "table",
-    path: "ONU",
-    authority: ["Admin"]
-  },
-  {
-    name: "用户",
-    icon: "profile",
-    path: "Users",
-    authority: ["Admin"]
-  }
+
 ];
 
 function formatter(data, parentPath = "/", parentAuthority) {

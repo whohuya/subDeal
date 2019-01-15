@@ -27,7 +27,7 @@ const links = [
 
 const copyright = (
   <Fragment>
-    Copyright <Icon type="copyright" /> 2018 洛阳师范二手交易市场
+    Copyright <Icon type="copyright" /> 2018 河南城建二手交易市场
   </Fragment>
 );
 
@@ -35,9 +35,9 @@ class UserLayout extends React.PureComponent {
   getPageTitle() {
     const { routerData, location } = this.props;
     const { pathname } = location;
-    let title = "洛阳师范二手交易市场";
+    let title = "河南城建二手交易市场";
     if (routerData[pathname] && routerData[pathname].name) {
-      title = `${routerData[pathname].name} - 洛阳师范二手交易市场`;
+      title = `${routerData[pathname].name} - 河南城建二手交易市场`;
     }
     return title;
   }
@@ -54,7 +54,7 @@ class UserLayout extends React.PureComponent {
                   <span className={styles.title} />
                 </Link>
               </div>
-              <div className={styles.desc}>洛阳师范二手交易市场平台</div>
+              <div className={styles.desc}>河南城建二手交易市场平台</div>
             </div>
             <Switch>
               {getRoutes(match.path, routerData).map(item => (
