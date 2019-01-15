@@ -36,6 +36,7 @@ const Column = Table.Column
 export default class Details extends Component {
   state = {
     star:[],
+    GoodsDetail:{}
   }
 
   async componentWillMount () {
@@ -90,12 +91,31 @@ export default class Details extends Component {
     })
     // await this.onLoadComments(query.id)
   }
+  onLoadGoods=(id)=>{
+    this.props.dispatch({
+      type:'dashboard/dashboard/queryById',
+      payload:{
+        id,
+      },
+      callback:(res)=>{
+        this.setState({
+          GoodsDetail:res
+        })
+      }
+    })
+  }
+  handleOnExpand=async(expanded,record)=>{
+
+  }
     rowRender=(record)=>{
-      console.log(record)
+    const {GoodsDetail}=this.state
+     this.onLoadGoods(record.Goods)
+      return  <div>
+        <p>商品描述：{GoodsDetail.describe==='' ?`无相关具体描述`:`${GoodsDetail.describe}`}</p>
+      </div>
     }
   render () {
     const{star}=this.state
-    {console.log('a')}
     return (
 
       <PageHeaderLayout title="我的收藏">
@@ -104,6 +124,7 @@ export default class Details extends Component {
             dataSource={star}
             rowKey="id"
             onChange={this.handleTableChange}
+            onExpand={this.handleOnExpand}
             expandedRowRender={record => this.rowRender(record)}
           >
             <Column
@@ -135,29 +156,12 @@ export default class Details extends Component {
               title="操作"
               render={(text, ONU) => (
                 <div>
-                  <a onClick={() => this.onDetail(ONU)}>详情</a>
-                  <span className="ant-divider"/>
-                  <Dropdown
-                    overlay={
-                      <Menu>
-                        <Menu.Item onClick={() => this.editONU(ONU)}>
-                          <a>编辑</a>
-                        </Menu.Item>
-                        <Menu.Item>
-                          <Popconfirm
-                            title="确定要删除吗？"
-                            onConfirm={() => this.deleteONU(ONU)}
-                          >
-                            <a href="#">删除</a>
-                          </Popconfirm>
-                        </Menu.Item>
-                      </Menu>
-                    }
+                  <Popconfirm
+                    title="确定要删除吗？"
+                    onConfirm={() => this.deleteONU(ONU)}
                   >
-                    <a className="ant-dropdown-link">
-                      更多 <Icon type="down"/>
-                    </a>
-                  </Dropdown>
+                    <a href="#">删除</a>
+                  </Popconfirm>
                 </div>
               )}
             />
