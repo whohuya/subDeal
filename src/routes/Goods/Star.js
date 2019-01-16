@@ -38,6 +38,7 @@ export default class Star extends Component {
     star: [],
     GoodsDetail: {},
     GoodsId: null,
+    loading:false,
     render: <div>暂无数据</div>
   }
 
@@ -51,48 +52,44 @@ export default class Star extends Component {
 
   onLoadStar = () => {
     const user = Parse.User.current()
+    this.setState({
+      loading:true
+    })
     this.props.dispatch({
       type: 'dashboard/star/fetchByUserId',
       payload: {
         id: user.id
       },
       callback: res => {
-        console.log('my star')
-        console.log(res)
         this.setState({
-          star: res
+          star: res,
+          loading:false
         })
       }
     })
   }
 
-  onAddComments = async () => {
-    const {query} = this.props.location
-    const {user, value} = this.state
-    const id = Parse.User.current()
-    await this.props.dispatch({
-      type: 'dashboard/comment/add',
+  onCancelStar = async (item) => {
+
+    const user = await Parse.User.current();
+
+    this.props.dispatch({
+      type: "dashboard/star/cancel",
       payload: {
-        id: query.id,
-        author: user.name,
-        content: value,
-        name: id.id
+        id:item.Goods,
+        user: user.id
       },
       callback: res => {
-        this.setState({
-          submitting: false,
-          value: '',
-          comments: [res, ...this.state.comments]
-        })
-        // res === 'ok' ? this.setState({
-        //   submitting: false,
-        //   value: '',
-        //   comments:[res.response,...this.state.comments,]
-        // }) : message.error('评论失败')
+        res === "ok"
+          ? message.success("已取消收藏！")
+          : message.error("取消失败");
+        this.onLoadStar()
       }
-    })
-    // await this.onLoadComments(query.id)
-  }
+
+    });
+
+  };
+
   onLoadGoods = async (id) => {
     await this.props.dispatch({
       type: 'dashboard/dashboard/queryById',
@@ -100,7 +97,6 @@ export default class Star extends Component {
         id,
       },
       callback: (res) => {
-        console.log(res)
         this.setState({
           GoodsId: res.id,
           render: <div key={res.key}>
@@ -125,10 +121,10 @@ export default class Star extends Component {
           id:record.Goods,
         },
         callback: (res) => {
-          console.log(res)
            this.setState({
             GoodsId: record.id,
             render: <div key={res.key}>
+              <p>类型：{res.type}</p>
               <p>卖家：{res.sellName.name}</p>
               <p>商品描述：{res.describe === undefined ? `无相关具体描述` : `${res.describe}`}</p>
             </div>
@@ -144,7 +140,7 @@ export default class Star extends Component {
   }
 
   render () {
-    const {star, GoodsId} = this.state
+    const {star, GoodsId,loading} = this.state
     return (
 
       <PageHeaderLayout title="我的收藏">
@@ -152,6 +148,8 @@ export default class Star extends Component {
           <Table
             dataSource={star}
             rowKey="id"
+            loading={loading}
+            onChange={this.onLoadStar}
             onExpand={this.handleOnExpand}
              expandedRowKeys={[GoodsId]}
             expandedRowRender={() => this.rowRender()}
@@ -183,13 +181,17 @@ export default class Star extends Component {
             />
             <Column
               title="操作"
-              render={(text, ONU) => (
+              render={(text, item) => (
                 <div>
+                  <Link to={{pathname: '/GoodsDetails', query: {id: item.Goods}}}>
+                    查看详情
+                  </Link>
+                  <span className='ant-divider' />
                   <Popconfirm
-                    title="确定要删除吗？"
-                    onConfirm={() => this.deleteONU(ONU)}
+                    title="确定要取消收藏吗？"
+                    onConfirm={() => this.onCancelStar(item)}
                   >
-                    <a href="#">删除</a>
+                    <a href="#">取消收藏</a>
                   </Popconfirm>
                 </div>
               )}

@@ -70,6 +70,7 @@ export async function add (payload) {
 
 export async function cancel (payload) {
   const {id,user} = payload
+  console.log(payload)
   try {
     const query = new Parse.Query('star')
     query.equalTo('Goods', id)

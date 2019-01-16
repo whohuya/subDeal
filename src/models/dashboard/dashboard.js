@@ -34,8 +34,6 @@ export default {
             sellName: item.sellName.attributes
           }
         })
-
-      console.log(res)
       if (callback) {
         callback(res)
       }
@@ -51,16 +49,14 @@ export default {
             sellName: item.sellName.attributes
           }
         })
-      console.log(res)
       if (callback) {
         callback(res)
       }
     },
 
     * queryById ({payload, callback}, {call, put}) {
-   
+
       const response = yield  call(query, payload)
-      console.log(response)
       const res = (commonHelper.parseObjectToObject(response))
       const Goods = {...res,img:res.img.attributes,sellName:res.sellName.attributes}
       if (callback) {

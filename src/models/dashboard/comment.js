@@ -33,7 +33,6 @@ export default {
           datetime: moment(item.createdAt).format("YYYY-MM-DD HH:mm:ss")
         };
       });
-      console.log(comments);
       if (callback) {
         callback(comments);
       }
