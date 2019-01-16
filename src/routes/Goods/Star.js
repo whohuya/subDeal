@@ -37,7 +37,8 @@ export default class Star extends Component {
   state = {
     star: [],
     GoodsDetail: {},
-    Render: <div></div>
+    GoodsId: null,
+    render: <div>暂无数据</div>
   }
 
   async componentWillMount () {
@@ -92,32 +93,58 @@ export default class Star extends Component {
     })
     // await this.onLoadComments(query.id)
   }
-  onLoadGoods = (id) => {
-    this.props.dispatch({
+  onLoadGoods = async (id) => {
+    await this.props.dispatch({
       type: 'dashboard/dashboard/queryById',
       payload: {
         id,
       },
       callback: (res) => {
+        console.log(res)
         this.setState({
-          GoodsDetail: res
+          GoodsId: res.id,
+          render: <div key={res.key}>
+            <p>卖家：{res.sellName.name}</p>
+            <p>商品描述：{res.describe === undefined ? `无相关具体描述` : `${res.describe}`}</p>
+          </div>
         })
       }
     })
+
   }
 
-  rowRender = (record) => {
-    const {GoodsDetail} = this.state
-    this.onLoadGoods(record.Goods)
-    return <div>
-      <p>卖家：{GoodsDetail.sellName}</p>
-      <p>商品描述：{GoodsDetail.describe === '' ? `无相关具体描述` : `${GoodsDetail.describe}`}</p>
-    </div>
-
+  rowRender = () => {
+    const {render} = this.state
+    return render
+  }
+  handleOnExpand = async (expanded, record) => {
+    if (expanded) {
+      await this.props.dispatch({
+        type: 'dashboard/dashboard/queryById',
+        payload: {
+          id:record.Goods,
+        },
+        callback: (res) => {
+          console.log(res)
+           this.setState({
+            GoodsId: record.id,
+            render: <div key={res.key}>
+              <p>卖家：{res.sellName.name}</p>
+              <p>商品描述：{res.describe === undefined ? `无相关具体描述` : `${res.describe}`}</p>
+            </div>
+          })
+        }
+      })
+    } else if (!expanded) {
+      this.setState({
+        GoodsId: null,
+        render: null
+      })
+    }
   }
 
   render () {
-    const {star} = this.state
+    const {star, GoodsId} = this.state
     return (
 
       <PageHeaderLayout title="我的收藏">
@@ -125,8 +152,9 @@ export default class Star extends Component {
           <Table
             dataSource={star}
             rowKey="id"
-            onChange={this.handleTableChange}
-            expandedRowRender={record => this.rowRender(record)}
+            onExpand={this.handleOnExpand}
+             expandedRowKeys={[GoodsId]}
+            expandedRowRender={() => this.rowRender()}
           >
             <Column
               title="图片"

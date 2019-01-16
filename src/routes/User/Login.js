@@ -55,7 +55,7 @@ class NormalLoginForm extends Component {
 		return (
 			<div className={styles.main}>
         <div>
-          <img src={logo} style={{width:80,height:80}}/>
+          <img src={'logo.png'} style={{width:80,height:80}}/>
           <span style={{fontSize:32,fontWeight:900, color:'#0051A3',marginLeft:8,}}>二手交易市场</span>
         </div>
 

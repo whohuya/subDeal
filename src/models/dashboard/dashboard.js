@@ -58,14 +58,13 @@ export default {
     },
 
     * queryById ({payload, callback}, {call, put}) {
+   
       const response = yield  call(query, payload)
-      const res = {
-        ...response.attributes,
-        img: response.attributes.img.attributes,
-        sellName:response.attributes.sellName.attributes
-      }
+      console.log(response)
+      const res = (commonHelper.parseObjectToObject(response))
+      const Goods = {...res,img:res.img.attributes,sellName:res.sellName.attributes}
       if (callback) {
-        callback(res)
+        callback(Goods)
       }
     },
   },
