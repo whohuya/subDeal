@@ -17,8 +17,10 @@ import {
   Input,
   List,
   message,
+
   Switch,
   BackTop,
+  Select,
   Popconfirm,
   Modal,
   Avatar,
@@ -32,12 +34,20 @@ import PageHeaderLayout from '../../layouts/PageHeaderLayout'
 import { Parse } from '../../utils/leancloud'
 
 const Column = Table.Column
+const FormItem = Form.Item
+const Option = Select.Option
+
 @connect()
-export default class Star extends Component {
+class GoodsList extends Component {
   state = {
-    star: [],
+    GoodsList: [],
+    replayList: [],
     GoodsDetail: {},
-    Render: <div></div>
+    GoodsId: null,
+    updateId:null,
+    modalVisible: false,
+    loading: false,
+    render: <div>暂无数据</div>
   }
 
   async componentWillMount () {
@@ -45,105 +55,266 @@ export default class Star extends Component {
   }
 
   async componentDidMount () {
-    this.onLoadStar()
+    this.onLoadGoodsList()
+    this.onLoadReplay()
   }
 
-  onLoadStar = () => {
+  onLoadGoodsList = () => {
     const user = Parse.User.current()
+    this.setState({
+      loading: true
+    })
     this.props.dispatch({
-      type: 'dashboard/star/fetchByUserId',
+      type: 'dashboard/goods/fetchBySellName',
       payload: {
         id: user.id
       },
       callback: res => {
-        console.log('my star')
-        console.log(res)
         this.setState({
-          star: res
+          GoodsList: res,
+          loading: false
         })
       }
     })
   }
-
-  onAddComments = async () => {
-    const {query} = this.props.location
-    const {user, value} = this.state
-    const id = Parse.User.current()
-    await this.props.dispatch({
-      type: 'dashboard/comment/add',
+  onLoadReplay = () => {
+    const user = Parse.User.current()
+    this.setState({
+      loading: true
+    })
+    this.props.dispatch({
+      type: 'dashboard/goods/fetchByReplay',
       payload: {
-        id: query.id,
-        author: user.name,
-        content: value,
-        name: id.id
+        id: user.id
       },
       callback: res => {
         this.setState({
-          submitting: false,
-          value: '',
-          comments: [res, ...this.state.comments]
+          replayList: res,
+          loading: false
         })
-        // res === 'ok' ? this.setState({
-        //   submitting: false,
-        //   value: '',
-        //   comments:[res.response,...this.state.comments,]
-        // }) : message.error('评论失败')
       }
     })
-    // await this.onLoadComments(query.id)
   }
-  onLoadGoods = (id) => {
+
+  onCancelGoodsList = (item) => {
     this.props.dispatch({
-      type: 'dashboard/dashboard/queryById',
+      type: 'dashboard/goods/sell',
       payload: {
-        id,
+        id: item.id,
       },
-      callback: (res) => {
-        this.setState({
-          GoodsDetail: res
-        })
+      callback: res => {
+        res === 'ok'
+          ? message.success('已下架！')
+          : message.error('下架失败')
+        this.onLoadReplay()
+        this.onLoadGoodsList()
+      }
+    })
+
+  }
+  handleAgainUpload = (item) => {
+    this.props.dispatch({
+      type: 'dashboard/goods/replay',
+      payload: {
+        id: item.id,
+      },
+      callback: res => {
+        res === 'ok'
+          ? message.success('上架成功！')
+          : message.error('上架失败！')
+        this.onLoadReplay()
+        this.onLoadGoodsList()
       }
     })
   }
 
-  rowRender = (record) => {
-    const {GoodsDetail} = this.state
-    this.onLoadGoods(record.Goods)
-    return <div>
-      <p>卖家：{GoodsDetail.sellName}</p>
-      <p>商品描述：{GoodsDetail.describe === '' ? `无相关具体描述` : `${GoodsDetail.describe}`}</p>
-    </div>
+  rowRender = () => {
+    const {render} = this.state
+    return render
+  }
+  handleOnExpand = async (expanded, record) => {
+    if (expanded) {
+      await this.props.dispatch({
+        type: 'dashboard/dashboard/queryById',
+        payload: {
+          id: record.id,
+        },
+        callback: (res) => {
+          this.setState({
+            GoodsId: record.id,
+            render: <div key={res.key}>
+              <p>类型：{res.type}</p>
+              <p>商品描述：{res.describe === undefined ? `无相关具体描述` : `${res.describe}`}</p>
+            </div>
+          })
+        }
+      })
+    } else if (!expanded) {
+      this.setState({
+        GoodsId: null,
+        render: null
+      })
+    }
+  }
+  showModal = (item) => {
+    this.setState({
+      modalVisible: true,
+      updateId:item.id,
 
+    })
+    this.props.form.setFieldsValue({
+      title: item.title,
+      price: item.price,
+      wear: item.wear,
+      describe: item.describe,
+    })
+  }
+
+  handleOk = (e) => {
+    e.preventDefault()
+
+    this.props.form.validateFields((err, values) => {
+      if (!err) {
+        this.props.dispatch({
+          type: "dashboard/goods/update",
+          payload: {
+            ...values,
+            id:this.state.updateId
+          },
+          callback:(res)=>{
+            res === 'ok'
+              ? message.success('修改成功！')
+              : message.error('修改失败！')
+            this.setState({
+              updateId:null
+            })
+            this.onLoadReplay()
+          }
+
+        });
+      }
+    })
+    this.setState({
+      modalVisible: false,
+    })
+  }
+
+  handleCancel = (e) => {
+    this.setState({
+      modalVisible: false,
+    })
   }
 
   render () {
-    const {star} = this.state
+    const {GoodsList, GoodsId, loading, replayList, modalVisible} = this.state
+    const {getFieldDecorator} = this.props.form
     return (
+      <PageHeaderLayout title="已发布的商品">
+        <BackTop/>
+        <Modal
+          title="修改相关内容"
+          visible={modalVisible}
+          onCancel={this.handleCancel}
+          footer={null}
+        >
+          <Form onSubmit={this.handleOk}>
+            <FormItem label='商品名称'>
+              {getFieldDecorator('title', {
 
-      <PageHeaderLayout title="我的收藏">
+                rules: [
+                  {required: true, message: '不能为空！'}
+                ]
+              })(
+                <Input
+                  prefix={
+                    <Icon type="shopping-cart" style={{color: 'rgba(0,0,0,.25)'}}/>
+                  }
+                  placeholder="商品名称"
+                />
+              )}
+            </FormItem>
+            <FormItem label='商品价格'>
+              {getFieldDecorator('price', {
+
+                rules: [
+                  {required: true, message: '价格!'}
+                ]
+              })(
+                <Input
+                  prefix={
+                    <Icon type="wallet" style={{color: 'rgba(0,0,0,.25)'}}/>
+                  }
+                  placeholder="价格"
+                />
+              )}
+            </FormItem>
+            <FormItem label={'商品成色'}>
+              {getFieldDecorator('wear', {
+                rules: [
+                  {required: true, message: '不能为空!'}
+                ]
+              })(
+                <Select>
+                  <Option value={'五成新'}>五成新</Option>
+                  <Option value={'六成新'}>六成新</Option>
+                  <Option value={'七成新'}>七成新</Option>
+                  <Option value={'八成新'}>八成新</Option>
+                  <Option value={'九成新'}>九成新</Option>
+                  <Option value={'全新'}>全新</Option>
+                </Select>
+              )}
+            </FormItem>
+            <FormItem label={'详细描述'}>
+              {getFieldDecorator('describe', {
+              })(
+                <Input.TextArea
+                  rows={4}
+                  prefix={
+                    <Icon type="user" style={{color: 'rgba(0,0,0,.25)'}}/>
+                  }
+                  placeholder="描述"
+                />
+              )}
+            </FormItem>
+            <FormItem style={{}}>
+              <Button
+                style={{width: '100%'}}
+                size="large"
+                type="primary"
+                htmlType="submit"
+              >
+                确 认 修 改
+              </Button>
+
+            </FormItem>
+          </Form>
+        </Modal>
         <Card>
           <Table
-            dataSource={star}
+            dataSource={GoodsList}
             rowKey="id"
-            onChange={this.handleTableChange}
-            expandedRowRender={record => this.rowRender(record)}
+            loading={loading}
+            onChange={this.onLoadGoodsList}
+            onExpand={this.handleOnExpand}
+            expandedRowKeys={[GoodsId]}
+            expandedRowRender={() => this.rowRender()}
           >
             <Column
               title="图片"
               dataIndex="starGoods.img"
               key="img"
               render={(text, item) => (
-                <div><img style={{width: 60, height: 60}} src={text.attributes.url}/></div>
+                <div><img style={{width: 60, height: 60}} src={item.img.url}/></div>
               )}
             />
             <Column
               title="标题"
-              dataIndex="starGoods.title"
+              dataIndex="title"
               key="title"
             />
             <Column
-              title="价格"
-              dataIndex="starGoods.price"
+              title="价格（￥）"
+              dataIndex="price"
               key="price"
             />
             <Column
@@ -155,13 +326,72 @@ export default class Star extends Component {
             />
             <Column
               title="操作"
-              render={(text, ONU) => (
+              render={(text, item) => (
                 <div>
+                  <Link to={{pathname: '/GoodsDetails', query: {id: item.id}}}>
+                    查看详情
+                  </Link>
+                  <span className='ant-divider'/>
                   <Popconfirm
-                    title="确定要删除吗？"
-                    onConfirm={() => this.deleteONU(ONU)}
+                    title="确定要下架？"
+                    onConfirm={() => this.onCancelGoodsList(item)}
                   >
-                    <a href="#">删除</a>
+                    <a href="#">下架商品</a>
+                  </Popconfirm>
+                </div>
+              )}
+            />
+          </Table>
+        </Card>
+        <Card style={{marginTop: 32}}>
+          <h2>已下架商品</h2>
+          <Table
+            dataSource={replayList}
+            rowKey="id"
+            loading={loading}
+            onChange={this.onLoadGoodsList}
+            onExpand={this.handleOnExpand}
+            expandedRowKeys={[GoodsId]}
+            expandedRowRender={() => this.rowRender()}
+          >
+            <Column
+              title="图片"
+              dataIndex="starGoods.img"
+              key="img"
+              render={(text, item) => (
+                <div><img style={{width: 60, height: 60}} src={item.img.url}/></div>
+              )}
+            />
+            <Column
+              title="标题"
+              dataIndex="title"
+              key="title"
+            />
+            <Column
+              title="价格（￥）"
+              dataIndex="price"
+              key="price"
+            />
+            <Column
+              title="上传时间"
+              dataIndex="CreateAt"
+              render={(text, item) => (
+                <div>{moment(item.createdAt).format('YYYY-MM-DD HH:mm:ss')}</div>
+              )}
+            />
+            <Column
+              title="操作"
+              render={(text, item) => (
+                <div>
+                  <a onClick={() => this.showModal(item)}>
+                    修改
+                  </a>
+                  <span className='ant-divider'/>
+                  <Popconfirm
+                    title="确定要重新上架？"
+                    onConfirm={() => this.handleAgainUpload(item)}
+                  >
+                    <a href="#">重新上架</a>
                   </Popconfirm>
                 </div>
               )}
@@ -172,3 +402,7 @@ export default class Star extends Component {
     )
   }
 }
+
+const GoodsPage = Form.create()(GoodsList)
+
+export default GoodsPage

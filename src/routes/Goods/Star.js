@@ -168,7 +168,7 @@ export default class Star extends Component {
               key="title"
             />
             <Column
-              title="价格"
+              title="价格（￥）"
               dataIndex="starGoods.price"
               key="price"
             />

@@ -24,6 +24,7 @@ export async function queryCarousel () {
 export async function queryAllGoods () {
   try {
     const query = new Parse.Query('Goods')
+    query.notEqualTo('sold',true)
     query.include('sellName')
     query.descending('createdAt')
     const response = await query.find()

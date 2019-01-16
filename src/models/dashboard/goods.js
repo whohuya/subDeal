@@ -1,4 +1,4 @@
-import { query, add } from "../../services/deal/comment";
+import { queryBySellName,cancel,replay,queryByReplay,update} from "../../services/deal/sellGoods";
 import { routerRedux } from "dva/router";
 import { Avatar } from "antd";
 import commonHelper from "../Helpers/Help";
@@ -11,7 +11,7 @@ export default {
   },
 
   effects: {
-    *findAll({ payload, callback }, { call, put }) {
+    *findAll({ payload, callback }, { call }) {
       const response = yield call(query, payload);
       const res = commonHelper.parseObjectArrayToObjectArray(response);
       const comments = res.map(item => {
@@ -37,7 +37,7 @@ export default {
         callback(comments);
       }
     },
-    *add({ payload, callback }, { call, put }) {
+    *add({ payload, callback }, { call }) {
       const res = yield call(add, payload);
       const response = commonHelper.parseObjectToObject(res.response);
 
@@ -61,6 +61,40 @@ export default {
 
       if (callback) {
         callback(item);
+      }
+    },
+    *fetchBySellName({payload,callback},{call}){
+     const res= yield call(queryBySellName,payload)
+      const response=commonHelper.parseObjectArrayToObjectArray(res)
+                                 .map(item=>{return {...item,img:item.img.attributes,sellName:item.sellName.attributes}})
+      if(callback){
+       callback(response)
+      }
+    },
+    *fetchByReplay({payload,callback},{call}){
+      const res= yield call(queryByReplay,payload)
+      const response=commonHelper.parseObjectArrayToObjectArray(res)
+                                 .map(item=>{return {...item,img:item.img.attributes,sellName:item.sellName.attributes}})
+      if(callback){
+        callback(response)
+      }
+    },
+    *replay({payload,callback},{call}){
+     const res= yield call(replay,payload)
+      if(callback){
+       callback(res.status)
+      }
+    },
+    *sell({payload,callback},{call}){
+     const res= yield call(cancel,payload)
+      if(callback){
+       callback(res.status)
+      }
+    },
+    *update({payload,callback},{call}){
+      const res=yield call(update,payload)
+      if(callback){
+        callback(res.status)
       }
     }
   },
