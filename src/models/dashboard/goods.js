@@ -1,4 +1,5 @@
-import { queryBySellName,cancel,replay,queryByReplay,update} from "../../services/deal/sellGoods";
+import { queryBySellName,cancel,replay,queryByReplay,update,} from "../../services/deal/sellGoods";
+import { add} from "../../services/deal/deal";
 import { routerRedux } from "dva/router";
 import { Avatar } from "antd";
 import commonHelper from "../Helpers/Help";
@@ -37,10 +38,11 @@ export default {
         callback(comments);
       }
     },
+
     *add({ payload, callback }, { call }) {
       const res = yield call(add, payload);
       const response = commonHelper.parseObjectToObject(res.response);
-
+      console.log(res)
       const item = {
         author: response.author,
         avatar: (

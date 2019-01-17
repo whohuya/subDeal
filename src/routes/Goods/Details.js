@@ -232,6 +232,7 @@ export default class Details extends Component {
               onOk={this.cancel}
               onCancel={this.cancel}
             >
+              <p>卖家Id：{item.sellName.name }</p>
               <p>电话：{item.sellName.phone}</p>
               <p>
                 微信：

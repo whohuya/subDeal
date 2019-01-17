@@ -44,6 +44,8 @@ export default {
                                   starName: item.starName.attributes,
                                 }
                               })
+                              .filter(item=>!item.starGoods.sold&&item)
+
       if(callback){
         callback(res)
 

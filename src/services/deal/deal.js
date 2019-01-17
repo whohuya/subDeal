@@ -7,6 +7,7 @@
 
 import { Parse, Promise, handleError } from '../../utils/leancloud'
 import { setAuthority } from '../../utils/authority'
+import comment from '../../models/dashboard/comment'
 
 export async function queryCarousel () {
   try {
@@ -24,7 +25,7 @@ export async function queryCarousel () {
 export async function queryAllGoods () {
   try {
     const query = new Parse.Query('Goods')
-    query.notEqualTo('sold',true)
+    query.notEqualTo('sold', true)
     query.include('sellName')
     query.descending('createdAt')
     const response = await query.find()
@@ -69,3 +70,23 @@ export async function find (payload) {
   }
 }
 
+export async function add (payload) {
+  try {
+    console.log('payload', payload)
+    const {name, file} = payload
+    const img = new Parse.File(name, file)
+    const res = await img.save()
+    const Comment = Parse.Object.extend('Goods')
+    const comments = new Comment();
+    comments.set('img',res)
+    const response = await comments.save();
+    console.log(response)
+    return res
+  } catch (e) {
+    handleError(e)
+    console.log(e)
+    return Promise.resolve({
+      status: 'fail'
+    })
+  }
+}

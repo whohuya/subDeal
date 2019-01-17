@@ -56,8 +56,6 @@ export async function login ({username, password}) {
     // 2. get user roles
     const roles = await getCurrentUserRoles()
     // todo: 3. get user profile
-    console.log(user)
-    console.log(roles)
     // 登陆成功返回：
     return Promise.resolve({
       roles: roles.length > 0 ? roles : ['Guest'],
