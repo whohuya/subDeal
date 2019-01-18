@@ -13,6 +13,7 @@ import {
   Carousel,
   Divider,
   Comment,
+  Cascader,
   Form,
   Select,
   InputNumber,
@@ -46,6 +47,108 @@ class AddGoods extends Component {
     star: [],
     GoodsDetail: {},
     imgFile: null,
+    options: [
+      {
+        value: '河南省',
+        label: '河南省',
+        children: [
+          {
+          value: '郑州',
+          label: '郑州',
+          children: [
+            {
+            value: '二七区',
+            label: '二七区',
+          },
+            {
+            value: '管城回族区',
+            label: '管城回族区',
+          },
+            {
+            value: '惠济区',
+            label: '惠济区',
+          },
+            {
+            value: '金水区',
+            label: '金水区',
+          },
+            {
+            value: '上街区',
+            label: '上街区',
+          }, {
+            value: '中原区',
+            label: '中原区',
+          },
+            {
+            value: '其他区',
+            label: '其他区',
+          },
+          ],
+        },
+          {
+          value: '洛阳',
+          label: '洛阳',
+          children: [
+            {
+            value: '吉利区',
+            label: '吉利区',
+          },
+            {
+            value: '涧西区',
+            label: '涧西区',
+          },
+            {
+            value: '老城区',
+            label: '老城区',
+          },
+            {
+            value: '西宫区',
+            label: '西宫区',
+          },{
+            value: '瀍河回族区',
+            label: '瀍河回族区',
+          },{
+            value: '洛龙区',
+            label: '洛龙区',
+          },{
+            value: '伊滨区',
+            label: '伊滨区',
+          },
+            {
+            value: '其他区',
+            label: '其他区',
+          },
+          ],
+        },
+
+          {
+          value: '平顶山',
+          label: '平顶山',
+          children: [
+            {
+            value: '石龙区',
+            label: '石龙区',
+          },
+            {
+            value: '卫东区',
+            label: '卫东区',
+          },
+            {
+            value: '新华区',
+            label: '新华区',
+          },
+            {
+            value: '湛河区',
+            label: '湛河区',
+          },{
+            value: '其他区',
+            label: '其他区',
+          },
+          ],
+        },
+        ],
+      },
+   ]
   }
 
   async componentWillMount () {
@@ -58,18 +161,24 @@ class AddGoods extends Component {
 
   handleSubmit = (e) => {
     e.preventDefault()
-    const {imgFile}=this.state
+    const user = Parse.User.current()
+    const {imgFile} = this.state
     this.props.form.validateFields((err, values) => {
       if (!err) {
         console.log(values)
-        // this.props.dispatch({
-        //   type: 'dashboard/goods/add',
-        //   payload: {
-        //     file: imgFile,
-        //     imgName: 'logo.img',
-        //     ...values
-        //   }
-        // })
+        const newPlace=values.place.join(' ')+' '+values.placeDetail
+        this.props.dispatch({
+          type: 'dashboard/goods/add',
+          payload:{
+            imgName:'show.jpg',
+            file:imgFile,
+            ...values,
+            price:`${values.price}`,
+            place:newPlace,
+            user:user.id
+          },
+
+        })
       }
     })
   }
@@ -126,161 +235,107 @@ class AddGoods extends Component {
             </Form.Item>
             <Form.Item
               {...formItemLayout}
-              label="Title"
+              label="商品类型"
+              hasFeedback
             >
-              <Input/>
+              {getFieldDecorator('type', {
+                rules: [
+                  {required: true, message: '请一定选择商品类型!'},
+                ],
+              })(
+                <Select placeholder={'请选择商品类型'}>
+                  <Option value={'手机'}>手机</Option>
+                  <Option value={'数码'}>数码</Option>
+                  <Option value={'服装'}>服装</Option>
+                  <Option value={'居家'}>居家</Option>
+                  <Option value={'美妆'}>美妆</Option>
+                  <Option value={'运动'}>运动</Option>
+                </Select>
+              )}
+            </Form.Item>
+            <Form.Item  {...formItemLayout} label='商品价格'>
+              {getFieldDecorator('price', {
+
+                rules: [
+                  {required: true, message: '不能为空！'}
+                ]
+              })(
+                <InputNumber  />
+              )} <span className="ant-form-text"> ￥</span>
             </Form.Item>
             <Form.Item
               {...formItemLayout}
-              label="Title"
+              label="是否同意议价"
+            >
+              {getFieldDecorator('isDiscuss', {valuePropName: 'checked'})(
+                <Switch
+                  checkedChildren="同意"
+                  unCheckedChildren="不同意"
+                />
+              )}
+            </Form.Item>
+            <Form.Item
+              {...formItemLayout}
+              label="商品成色"
               hasFeedback
             >
-              {getFieldDecorator('select', {
+              {getFieldDecorator('wear', {
                 rules: [
-                  {required: true, message: 'Please select your country!'},
+                  {required: true, message: '不支持出售五成新以下的商品!'},
                 ],
               })(
-                <Select placeholder="Please select a country">
-                  <Option value="china">China</Option>
-                  <Option value="usa">U.S.A</Option>
+                <Select>
+                  <Option value={'五成新'}>五成新</Option>
+                  <Option value={'六成新'}>六成新</Option>
+                  <Option value={'七成新'}>七成新</Option>
+                  <Option value={'八成新'}>八成新</Option>
+                  <Option value={'九成新'}>九成新</Option>
+                  <Option value={'全新'}>全新</Option>
                 </Select>
               )}
             </Form.Item>
             <Form.Item
-            {...formItemLayout}
-            label="Select[multiple]"
-          >
-            {getFieldDecorator('select-multiple', {
-              rules: [
-                {required: true, message: 'Please select your favourite colors!', type: 'array'},
-              ],
-            })(
-              <Select mode="multiple" placeholder="Please select favourite colors">
-                <Option value="red">Red</Option>
-                <Option value="green">Green</Option>
-                <Option value="blue">Blue</Option>
-              </Select>
-            )}
-          </Form.Item>
-
-            <Form.Item
               {...formItemLayout}
-              label="InputNumber"
+              label="商品描述"
             >
-              {getFieldDecorator('input-number', {initialValue: 3})(
-                <InputNumber min={1} max={10}/>
-              )}
-              <span className="ant-form-text"> machines</span>
-            </Form.Item>
-
-            <Form.Item
-              {...formItemLayout}
-              label="Switch"
-            >
-              {getFieldDecorator('switch', {valuePropName: 'checked'})(
-                <Switch/>
-              )}
-            </Form.Item>
-
-            <Form.Item
-              {...formItemLayout}
-              label="Slider"
-            >
-              {getFieldDecorator('slider')(
-                <Slider marks={{
-                  0: 'A', 20: 'B', 40: 'C', 60: 'D', 80: 'E', 100: 'F',
-                }}
+              {getFieldDecorator('describe', {})(
+                <Input.TextArea
+                  rows={4}
+                  placeholder="描述"
                 />
               )}
             </Form.Item>
-
             <Form.Item
               {...formItemLayout}
-              label="Radio.Group"
+              label="所在地区"
+              hasFeedback
             >
-              {getFieldDecorator('radio-group')(
-                <Radio.Group>
-                  <Radio value="a">item 1</Radio>
-                  <Radio value="b">item 2</Radio>
-                  <Radio value="c">item 3</Radio>
-                </Radio.Group>
-              )}
-            </Form.Item>
-
-            <Form.Item
-              {...formItemLayout}
-              label="Radio.Button"
-            >
-              {getFieldDecorator('radio-button')(
-                <Radio.Group>
-                  <Radio.Button value="a">item 1</Radio.Button>
-                  <Radio.Button value="b">item 2</Radio.Button>
-                  <Radio.Button value="c">item 3</Radio.Button>
-                </Radio.Group>
-              )}
-            </Form.Item>
-
-            <Form.Item
-              {...formItemLayout}
-              label="Checkbox.Group"
-            >
-              {getFieldDecorator('checkbox-group', {
-                initialValue: ['A', 'B'],
+              {getFieldDecorator('place', {
+                rules: [
+                  {required: true, message: '地区不能为空!'},
+                ],
               })(
-                <Checkbox.Group style={{width: '100%'}}>
-                  <Row>
-                    <Col span={8}><Checkbox value="A">A</Checkbox></Col>
-                    <Col span={8}><Checkbox disabled value="B">B</Checkbox></Col>
-                    <Col span={8}><Checkbox value="C">C</Checkbox></Col>
-                    <Col span={8}><Checkbox value="D">D</Checkbox></Col>
-                    <Col span={8}><Checkbox value="E">E</Checkbox></Col>
-                  </Row>
-                </Checkbox.Group>
+                <Cascader options={this.state.options} />
               )}
             </Form.Item>
+            <Form.Item  {...formItemLayout} label='详细地址'>
+              {getFieldDecorator('placeDetail', {
 
-            <Form.Item
-              {...formItemLayout}
-              label="Rate"
-            >
-              {getFieldDecorator('rate', {
-                initialValue: 3.5,
+                rules: [
+                  {required: true, message: '不能为空！'}
+                ]
               })(
-                <Rate/>
+                <Input
+                  placeholder="详细地址"
+                />
               )}
             </Form.Item>
-
             <Form.Item
               {...formItemLayout}
-              label="Upload"
-              extra=""
+              label="上传商品展示图"
             >
-              {getFieldDecorator('upload')(
-                <input type="file" id="photoFileUpload"
-                       style={{padding: 16, border: '1px solid red'}}/>
-              )}
+                <input type="file" onChange={this.normFile} style={{padding: 16, border: '1px solid #D4D3D3',borderRadius:'15px'}}/>
             </Form.Item>
-
-            <Form.Item
-              {...formItemLayout}
-              label="Dragger"
-            >
-              <div className="dropbox">
-                {getFieldDecorator('dragger', {
-                  valuePropName: 'fileList',
-                  getValueFromEvent: this.normFile,
-                })(
-                  <Upload.Dragger name="files" action="/upload.do">
-                    <p className="ant-upload-drag-icon">
-                      <Icon type="inbox"/>
-                    </p>
-                    <p className="ant-upload-text">Click or drag file to this area to upload</p>
-                    <p className="ant-upload-hint">Support for a single or bulk upload.</p>
-                  </Upload.Dragger>
-                )}
-              </div>
-            </Form.Item>
-
             <Form.Item
               wrapperCol={{span: 12, offset: 6}}
             >

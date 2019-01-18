@@ -1,4 +1,4 @@
-import { queryBySellName,cancel,replay,queryByReplay,update,} from "../../services/deal/sellGoods";
+import { queryBySellName,cancel,replay,queryByReplay,update,remove} from "../../services/deal/sellGoods";
 import { add} from "../../services/deal/deal";
 import { routerRedux } from "dva/router";
 import { Avatar } from "antd";
@@ -41,29 +41,11 @@ export default {
 
     *add({ payload, callback }, { call }) {
       const res = yield call(add, payload);
-      const response = commonHelper.parseObjectToObject(res.response);
       console.log(res)
-      const item = {
-        author: response.author,
-        avatar: (
-          <Avatar
-            style={{
-              backgroundColor: "#1585FF",
-              verticalAlign: "middle",
-              marginTop: 8
-            }}
-            size={"large"}
-          >
-            {response.author}
-          </Avatar>
-        ),
-        content: <p>{response.content}</p>,
-        datetime: moment(response.createdAt).format("YYYY-MM-DD HH:mm:ss")
-      };
 
-      if (callback) {
-        callback(item);
-      }
+      // if (callback) {
+      //   callback(item);
+      // }
     },
     *fetchBySellName({payload,callback},{call}){
      const res= yield call(queryBySellName,payload)
@@ -95,6 +77,12 @@ export default {
     },
     *update({payload,callback},{call}){
       const res=yield call(update,payload)
+      if(callback){
+        callback(res.status)
+      }
+    },
+    *remove({payload,callback},{call}){
+      const res=yield call(remove,payload)
       if(callback){
         callback(res.status)
       }

@@ -22,7 +22,7 @@ export async function register ({username, password}) {
   }
 }
 
-export async function signUpAdmin ({username, password, mail, name,phone}) {
+export async function signUpAdmin ({username, password, mail, name,phone,weChat}) {
   const user = new Parse.User()
   try {
     user.setUsername(username)
@@ -30,10 +30,8 @@ export async function signUpAdmin ({username, password, mail, name,phone}) {
     user.setEmail(mail)
     user.set('name', name)
     user.set('phone', phone)
-    // const actNew=new Parse.Role('Admin')
-    // const relation=actNew.getUsers()
-    // relation.add(user.current())
-    //   const a =actNew.save()
+    user.set('weChat', weChat)
+
     const request = await user.signUp()
     return Promise.resolve({
       status: 'ok'
@@ -41,6 +39,7 @@ export async function signUpAdmin ({username, password, mail, name,phone}) {
 
   } catch (err) {
     handleError(err)
+    console.log(err)
     return Promise.resolve({
       status: 'fail'
     })

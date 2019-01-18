@@ -263,12 +263,15 @@ export default class Details extends Component {
                       </span>
                     </h3>
                     <Divider>
-                      {item.isDiscuss && (
+                      {!item.isDiscuss?(
                         <span style={{ color: "#F9DA61" }}>
                           <Icon type="bulb" />
-                          该商品拒绝讲价！
+                          该商品拒绝议价！
                         </span>
-                      )}
+                      ):(<span style={{ color: "#74C040" }}>
+                          <Icon type="bulb" />
+                          该商品同意议价！
+                        </span>)}
                     </Divider>
                     <h3 style={{ marginBottom: 16 }}>
                       成&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;色 ：{item.wear}

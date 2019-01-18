@@ -198,7 +198,24 @@ class GoodsList extends Component {
       modalVisible: false,
     })
   }
-
+  deleteGoods=(item)=>{
+    console.log(item)
+        this.props.dispatch({
+          type: "dashboard/goods/remove",
+          payload: {
+           id:item.id
+          },
+          callback:(res)=>{
+            res === 'ok'
+              ? message.success('删除成功！')
+              : message.error('删除失败！')
+            this.setState({
+              updateId:null
+            })
+            this.onLoadReplay()
+          }
+        });
+  }
   handleCancel = (e) => {
     this.setState({
       modalVisible: false,
@@ -387,12 +404,33 @@ class GoodsList extends Component {
                     修改
                   </a>
                   <span className='ant-divider'/>
-                  <Popconfirm
-                    title="确定要重新上架？"
-                    onConfirm={() => this.handleAgainUpload(item)}
+                  <Dropdown
+                    overlay={
+                      <Menu>
+                        <Menu.Item>
+                          <Popconfirm
+                            title="确定要重新上架？"
+                            onConfirm={() => this.handleAgainUpload(item)}
+                          >
+                            <a href="#">重新上架</a>
+                          </Popconfirm>
+                        </Menu.Item>
+                        <Menu.Item>
+                          <Popconfirm
+                            title="确定要删除该商品的所有信息吗？（不可恢复）"
+                            onConfirm={() => this.deleteGoods(item)}
+                          >
+                            <a>已卖出该商品</a>
+                          </Popconfirm>
+                        </Menu.Item>
+                      </Menu>
+                    }
                   >
-                    <a href="#">重新上架</a>
-                  </Popconfirm>
+                    <a className="ant-dropdown-link">
+                      更多 <Icon type="down" />
+                    </a>
+                  </Dropdown>
+
                 </div>
               )}
             />

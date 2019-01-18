@@ -73,15 +73,24 @@ export async function find (payload) {
 export async function add (payload) {
   try {
     console.log('payload', payload)
-    const {name, file} = payload
-    const img = new Parse.File(name, file)
+    const {imgName, file,isDiscuss,place,price,title,type,wear,user,describe} = payload
+    const img = new Parse.File(imgName, file)
     const res = await img.save()
     const Comment = Parse.Object.extend('Goods')
+    const targetSellName = Parse.Object.createWithoutData('_User', user)
     const comments = new Comment();
     comments.set('img',res)
+    comments.set('title',title)
+    comments.set('wear',wear)
+    comments.set('place',place)
+    comments.set('isDiscuss',isDiscuss)
+    comments.set('type',type)
+    comments.set('describe',describe)
+    comments.set('price',price)
+    comments.set('sellName',targetSellName)
     const response = await comments.save();
     console.log(response)
-    return res
+    return response
   } catch (e) {
     handleError(e)
     console.log(e)
@@ -90,3 +99,4 @@ export async function add (payload) {
     })
   }
 }
+

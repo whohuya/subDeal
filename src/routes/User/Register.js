@@ -166,7 +166,7 @@ export default class Register extends Component {
                   message: '请输入用户名！',
                 },
               ],
-            })(<Input size="large" placeholder="用户名"/>)}
+            })(<Input size="large" placeholder="用户名(推荐字母加数字组合)"/>)}
           </FormItem>
           <FormItem>
             {getFieldDecorator('name', {
@@ -205,6 +205,16 @@ export default class Register extends Component {
                 },
               ],
             })(<Input size="large" placeholder="手机号"/>)}
+          </FormItem>
+          <FormItem>
+            {getFieldDecorator('weChat', {
+              rules: [
+                {
+                  required: true,
+                  message: '请输入微信号！',
+                },
+              ],
+            })(<Input size="large" placeholder="微信号 ！"/>)}
           </FormItem>
           <FormItem help={this.state.help}>
             <Popover
